@@ -1,0 +1,40 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  hosts:
+  - kibana.local
+  gateways:
+  - istio-system/istio-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 5601
+        host: elk-kibana.logging.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: elk-client
+  namespace: logging
+spec:
+  hosts:
+  - es.local
+  gateways:
+  - istio-system/istio-gateway
+  tls:
+  - match:
+    - port: 8443
+      sniHosts:
+      - es.local
+    route:
+    - destination:
+        port:
+          number: 9200
+        host: es.logging.svc.cluster.local
