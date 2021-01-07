@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
 spec:
   hosts:
-  - prometheus.monitoring.svc.cluster.local
+  - prometheus.local
   gateways:
   - istio-system/istio-gateway
   http:
@@ -25,7 +25,7 @@ metadata:
   namespace: monitoring
 spec:
   hosts:
-  - alertmanager.monitoring.svc.cluster.local
+  - alertmanager.local
   gateways:
   - istio-system/istio-gateway
   http:
@@ -45,7 +45,7 @@ metadata:
   namespace: monitoring
 spec:
   hosts:
-  - grafana.monitoring.svc.cluster.local
+  - grafana.local
   gateways:
   - istio-system/istio-gateway
   http:
@@ -65,7 +65,7 @@ metadata:
   namespace: monitoring
 spec:
   hosts:
-  - karma.monitoring.svc.cluster.local
+  - karma.local
   gateways:
   - istio-system/istio-gateway
   http:
@@ -85,7 +85,7 @@ metadata:
   namespace: monitoring
 spec:
   hosts:
-  - blackbox-exporter.monitoring.svc.cluster.local
+  - blackbox-exporter.local
   gateways:
   - istio-system/istio-gateway
   http:

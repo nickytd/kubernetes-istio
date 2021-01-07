@@ -22,6 +22,3 @@ echo "create cluster"
 kind create cluster --name kind --config ${dir}/cluster/kind-config.yaml
 
 kubectl cluster-info --context kind-kind
-
-echo "deploy nginx-ingress controler"
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml

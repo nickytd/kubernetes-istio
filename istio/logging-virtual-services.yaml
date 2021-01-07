@@ -30,7 +30,7 @@ spec:
   - istio-system/istio-gateway
   tls:
   - match:
-    - port: 8443
+    - port: 443
       sniHosts:
       - es.local
     route:

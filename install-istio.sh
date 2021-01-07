@@ -17,25 +17,20 @@ fi
 kubectl create namespace istio-system \
   --dry-run=client -o yaml | kubectl apply -f -
 
-helm upgrade --namespace istio-system istio-base \
+helm upgrade istio-base --namespace istio-system \
   ${dir}/istio-$ISTIO_VERSION/manifests/charts/base \
   --install --wait --timeout 15m
 
-helm upgrade --namespace istio-system istiod \
+helm upgrade istiod --namespace istio-system \
   ${dir}/istio-$ISTIO_VERSION/manifests/charts/istio-control/istio-discovery \
-  -f ${dir}/istio/istio-discovery-values.yaml \
   --set global.hub="docker.io/istio" --set global.tag="$ISTIO_VERSION" \
   --install --wait --timeout 15m
 
-helm upgrade --namespace istio-system istiod \
+helm upgrade istio-ingress --namespace istio-system \
   ${dir}/istio-$ISTIO_VERSION/manifests/charts/gateways/istio-ingress \
   -f ${dir}/istio/istio-ingress-values.yaml \
   --set global.hub="docker.io/istio" --set global.tag="$ISTIO_VERSION" \
   --install --wait --timeout 15m
-
-
-kubectl apply -f ${dir}/istio/istio-gateway-virtual-services.yaml -n istio-system \
-  --dry-run=client -o yaml | kubectl apply -f -
 
 for var in "$@"
 do
@@ -45,6 +40,15 @@ do
           --dry-run=client -o yaml | kubectl apply -f -
 
     elif [[ "$var" = "--with-monitoring" ]]; then
+
+
+      if [ ! -f ${dir}/../kubernetes-monitoring/install-monitoring.sh ]; then
+        echo "sync https://github.com/nickytd/kubernetes-monitoring in ${dir}/.."
+        exit
+      fi  
+
+      ${dir}/../kubernetes-monitoring/install-monitoring.sh
+
     	
     	kubectl apply -f ${dir}/istio/monitoring-virtual-services.yaml -n monitoring \
           --dry-run=client -o yaml | kubectl apply -f -
