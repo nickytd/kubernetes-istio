@@ -32,6 +32,9 @@ helm upgrade istio-ingress --namespace istio-system \
   --set global.hub="docker.io/istio" --set global.tag="$ISTIO_VERSION" \
   --install --wait --timeout 15m
 
+kubectl apply -f ${dir}/istio/istio-gw.yaml -n istio-system \
+  --dry-run=client -o yaml | kubectl apply -f -  
+
 for var in "$@"
 do
     if [[ "$var" = "--with-logging" ]]; then
@@ -60,6 +63,12 @@ do
     	
     	kubectl apply -f ${dir}/istio/monitoring-virtual-services.yaml -n monitoring \
           --dry-run=client -o yaml | kubectl apply -f -
+
+      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/extras/prometheus-operator.yaml \
+          -n istio-system --dry-run=client -o yaml | kubectl apply -f -
+
+       kubectl apply -f ${dir}/istio/grafana-dashboards.yaml \
+          -n monitoring --dry-run=client -o yaml | kubectl apply -f -    
 
     elif [[ "$var" = "--with-dashboard" ]]; then
       
