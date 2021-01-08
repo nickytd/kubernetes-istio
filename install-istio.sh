@@ -36,6 +36,14 @@ for var in "$@"
 do
     if [[ "$var" = "--with-logging" ]]; then
 
+      if [ ! -f ${dir}/../kubernetes-logging-helm/examples/install-elk.sh ]; then
+        echo "sync https://github.com/nickytd/kubernetes-logging-helm in ${dir}/.."
+        exit
+      fi  
+
+      ${dir}/../kubernetes-logging-helm/examples/install-elk.sh
+
+
     	kubectl apply -f ${dir}/istio/logging-virtual-services.yaml -n logging \
           --dry-run=client -o yaml | kubectl apply -f -
 
