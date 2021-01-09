@@ -60,12 +60,17 @@ do
 
       ${dir}/../kubernetes-monitoring/install-monitoring.sh
 
-    	
     	kubectl apply -f ${dir}/istio/monitoring-virtual-services.yaml -n monitoring \
           --dry-run=client -o yaml | kubectl apply -f -
 
-      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/extras/prometheus-operator.yaml \
+      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/jaeger.yaml \
           -n istio-system --dry-run=client -o yaml | kubectl apply -f -
+
+      kubectl apply -f ${dir}/istio/istio-virtual-services.yaml \
+          -n istio-system --dry-run=client -o yaml | kubectl apply -f -    
+
+      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/extras/prometheus-operator.yaml \
+          -n istio-system --dry-run=client -o yaml | kubectl apply -f -    
 
        kubectl apply -f ${dir}/istio/grafana-dashboards.yaml \
           -n monitoring --dry-run=client -o yaml | kubectl apply -f -    
