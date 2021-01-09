@@ -7,12 +7,25 @@ set -eo pipefail
 
 dir=$(dirname $0)
 
+external_domain=local
+
 echo "setting up istio $ISTIO_VERSION"
 
 if [[ ! -f ./istio-$ISTIO_VERSION/bin/istioctl ]]; then
     echo "downloading istio $ISTIO_VERSION"
 	curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
 fi
+
+if [[ ! -f ${dir}/ssl/wildcard.${external_domain}.crt ]]; then
+  mkdir -p ${dir}/ssl
+  openssl req -nodes -newkey rsa:2048 -new -sha256 \
+    -keyout ${dir}/ssl/wildcard.${external_domain}.key \
+    -out ${dir}/ssl/wildcard.${external_domain}.csr \
+    -subj "/C=/O=kind/OU=local/CN=*.${external_domain}"
+  openssl x509 -req -days 365 -in ${dir}/ssl/wildcard.${external_domain}.csr \
+    -signkey ${dir}/ssl/wildcard.${external_domain}.key \
+    -out ${dir}/ssl/wildcard.${external_domain}.crt  
+fi    
 
 kubectl create namespace istio-system \
   --dry-run=client -o yaml | kubectl apply -f -
@@ -26,6 +39,11 @@ helm upgrade istiod --namespace istio-system \
   --set global.hub="docker.io/istio" --set global.tag="$ISTIO_VERSION" \
   --install --wait --timeout 15m
 
+
+kubectl create secret tls istio-ingressgateway-certs --namespace istio-system \
+  --cert=${dir}/ssl/wildcard.${external_domain}.crt --key=${dir}/ssl/wildcard.${external_domain}.key \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 helm upgrade istio-ingress --namespace istio-system \
   ${dir}/istio-$ISTIO_VERSION/manifests/charts/gateways/istio-ingress \
   -f ${dir}/istio/istio-ingress-values.yaml \
@@ -33,7 +51,7 @@ helm upgrade istio-ingress --namespace istio-system \
   --install --wait --timeout 15m
 
 kubectl apply -f ${dir}/istio/istio-gw.yaml -n istio-system \
-  --dry-run=client -o yaml | kubectl apply -f -  
+  --dry-run=client -o yaml | kubectl apply -f - 
 
 for var in "$@"
 do
@@ -76,9 +94,17 @@ do
           -n monitoring --dry-run=client -o yaml | kubectl apply -f -    
 
     elif [[ "$var" = "--with-dashboard" ]]; then
-      
+
+      if [ ! -f ${dir}/../kubernetes-dashboard/install-kubernetes-dashboard.sh ]; then
+        echo "sync https://github.com/nickytd/kubernetes-dashboard in ${dir}/.."
+        exit
+      fi  
+
+      ${dir}/../kubernetes-dashboard/install-kubernetes-dashboard.sh
+
       kubectl apply -f ${dir}/istio/kubernetes-dashboard-virtual-services.yaml -n kubernetes-dashboard \
-          --dry-run=client -o yaml | kubectl apply -f -      
+          --dry-run=client -o yaml | kubectl apply -f -
+
     fi      
 
 done
