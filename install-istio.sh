@@ -65,7 +65,7 @@ do
       ${dir}/../kubernetes-logging-helm/examples/install-elk.sh
 
 
-    	kubectl apply -f ${dir}/istio/logging-virtual-services.yaml -n logging \
+    	kubectl apply -f ${dir}/istio/virtual-services/logging.yaml -n logging \
           --dry-run=client -o yaml | kubectl apply -f -
 
     elif [[ "$var" = "--with-monitoring" ]]; then
@@ -78,20 +78,27 @@ do
 
       ${dir}/../kubernetes-monitoring/install-monitoring.sh
 
-    	kubectl apply -f ${dir}/istio/monitoring-virtual-services.yaml -n monitoring \
+    	kubectl apply -f ${dir}/istio/virtual-services/monitoring.yaml -n monitoring \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/extras/prometheus-operator.yaml \
+          -n istio-system --dry-run=client -o yaml | kubectl apply -f -    
+
+      kubectl apply -f ${dir}/istio/grafana/grafana-dashboards.yaml \
+          -n monitoring --dry-run=client -o yaml | kubectl apply -f -    
+
+    elif [[ "$var" = "--with-tracing" ]]; then
+
+      kubectl apply -f ${dir}/istio/virtual-services/tracing.yaml -n istio-system \
           --dry-run=client -o yaml | kubectl apply -f -
 
       kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/jaeger.yaml \
           -n istio-system --dry-run=client -o yaml | kubectl apply -f -
 
-      kubectl apply -f ${dir}/istio/istio-virtual-services.yaml \
-          -n istio-system --dry-run=client -o yaml | kubectl apply -f -    
-
-      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/extras/prometheus-operator.yaml \
-          -n istio-system --dry-run=client -o yaml | kubectl apply -f -    
-
-       kubectl apply -f ${dir}/istio/grafana-dashboards.yaml \
-          -n monitoring --dry-run=client -o yaml | kubectl apply -f -    
+    elif [[ "$var" = "--with-kiali" ]]; then
+      
+      kubectl apply -f ${dir}/istio-$ISTIO_VERSION/samples/addons/kiali.yaml \
+          -n istio-system --dry-run=client -o yaml | kubectl apply -f -      
 
     elif [[ "$var" = "--with-dashboard" ]]; then
 
@@ -102,7 +109,7 @@ do
 
       ${dir}/../kubernetes-dashboard/install-kubernetes-dashboard.sh
 
-      kubectl apply -f ${dir}/istio/kubernetes-dashboard-virtual-services.yaml -n kubernetes-dashboard \
+      kubectl apply -f ${dir}/istio/virtual-services/kubernetes-dashboard.yaml -n kubernetes-dashboard \
           --dry-run=client -o yaml | kubectl apply -f -
 
     fi      
