@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ISTIO_VERSION=1.8.1
+ISTIO_VERSION=1.9.4
 
 
 set -eo pipefail
