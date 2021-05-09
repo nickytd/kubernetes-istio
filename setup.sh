@@ -4,6 +4,16 @@ ISTIO_VERSION=1.9.4
 
 set -eo pipefail
 
+
+if [[ "$1" == "-h" ]]; then
+   echo "## installs istio $ISTIO_VERSION ##"
+   echo "   supported options:"
+   echo "     --with-virtual-services"
+   echo "       adds monitoring and logging applicaitons virtual services"
+   exit
+fi
+
+
 dir=$(dirname $0)
 
 external_domain=local
@@ -56,6 +66,8 @@ do
     	for vss in ${dir}/virtual-services/*.yaml ; do
         kubectl apply -f ${vss}
        done
-    fi      
+    fi 
+
+
 
 done
