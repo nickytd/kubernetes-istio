@@ -5,7 +5,7 @@ metadata:
   namespace: logging
 spec:
   hosts:
-  - kibana.local
+  - kibana.local.dev
   gateways:
   - istio-system/istio-gateway
   http:
@@ -16,7 +16,7 @@ spec:
     - destination:
         port:
           number: 5601
-        host: elk-kibana.logging.svc.cluster.local
+        host: elk-kibana
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -25,16 +25,15 @@ metadata:
   namespace: logging
 spec:
   hosts:
-  - es.local
+  - es.local.dev
   gateways:
-  - istio-system/istio-gateway
+  - istio-system/istio-gateway-passthrough
   tls:
   - match:
-    - port: 443
-      sniHosts:
-      - es.local
+    - sniHosts:
+      - es.local.dev
     route:
     - destination:
         port:
           number: 9200
-        host: es.logging.svc.cluster.local
+        host: elk-client
