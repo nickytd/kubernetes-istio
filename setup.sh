@@ -39,8 +39,8 @@ helm upgrade istiod --namespace istio-system \
 
 if [ -d $dir/ssl ]; then
   kubectl create secret tls istio-ingressgateway-certs --namespace istio-system \
-    --cert=${dir}/ssl/_wildcard.local.dev.pem \
-    --key=${dir}/ssl/_wildcard.local.dev-key.pem \
+    --cert=${dir}/ssl/wildcard.crt \
+    --key=${dir}/ssl/wildcard.key \
     --dry-run=client -o yaml | kubectl apply -f -
 fi 
 
